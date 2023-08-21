@@ -3,7 +3,7 @@ import {Component} from 'react'
 import './index.css'
 
 class DigitalTimer extends Component {
-  state = {isPlay: true, count: 25}
+  state = {isPlay: false, count: 25, minutes: 0, seconds: 0}
 
   onIncrement = () => {
     this.setState(prevState => ({count: prevState.count + 1}))
@@ -25,17 +25,18 @@ class DigitalTimer extends Component {
       this.setState({timeElapsedInSeconds: 0})
     }
     if (isPlay) {
-      this.clearInterval()
+      clearInterval(this.intervalId)
     } else {
       this.intervalId = setInterval(this.incrementTimeElapsedInSeconds, 1000)
     }
     this.setState(prevState => ({isPlay: !prevState.isPlay}))
-    
   }
 
   getElapsedSecondsInTimeFormat = () => {
-    const stringifiedMinutes = minutes > 9 ? minutes : 0${minutes}
-    const stringifiedSeconds = seconds > 9 ? seconds : 0${seconds}
+    const {minutes, seconds} = this.state
+    const stringifiedMinutes = minutes > 9 ? minutes : `0${minutes}`
+    const stringifiedSeconds = seconds > 9 ? seconds : `0${seconds}`
+    this.setState({minutes: stringifiedMinutes, seconds: stringifiedSeconds})
   }
 
   onReset = () => {
@@ -43,14 +44,16 @@ class DigitalTimer extends Component {
   }
 
   render() {
-    const {count, isPlay} = this.state
+    const {count, isPlay, minutes, seconds} = this.state
 
     return (
       <div className="container">
         <h1 className="heading">Digital Timer</h1>
         <div className="sub-container">
           <div className="timer-container">
-            <p className="timer">{count}</p>
+            <h1 className="timer">
+              {minutes}:{seconds}
+            </h1>
             {isPlay ? (
               <p className="details">running</p>
             ) : (
