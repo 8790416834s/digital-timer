@@ -3,7 +3,7 @@ import {Component} from 'react'
 import './index.css'
 
 class DigitalTimer extends Component {
-  state = {isPlay: false, count: 25, minutes: 0, seconds: 0}
+  state = {isPlay: false, count: 25, minutes: 25, seconds: 0}
 
   onIncrement = () => {
     this.setState(prevState => ({count: prevState.count + 1}))
@@ -14,7 +14,15 @@ class DigitalTimer extends Component {
   }
 
   incrementTimeElapsedInSeconds = () => {
-    this.setState(prevState => ({count: prevState.count + 1}))
+    const {seconds} = this.state
+    if (seconds === 0) {
+      this.setState(prevState => ({
+        seconds: 59,
+        minutes: prevState.minutes - 1,
+      }))
+    } else {
+      this.setState(prevState => ({seconds: prevState.seconds - 1}))
+    }
   }
 
   isPlayButton = () => {
@@ -36,24 +44,27 @@ class DigitalTimer extends Component {
     const {minutes, seconds} = this.state
     const stringifiedMinutes = minutes > 9 ? minutes : `0${minutes}`
     const stringifiedSeconds = seconds > 9 ? seconds : `0${seconds}`
-    this.setState({minutes: stringifiedMinutes, seconds: stringifiedSeconds})
+    return `${stringifiedMinutes}:${stringifiedSeconds}`
   }
 
   onReset = () => {
-    this.setState({count: 25})
+    clearInterval(this.intervalId)
+    this.setState(prevState => ({
+      minutes: 25,
+      seconds: 0,
+      isPlay: !prevState.isPlay,
+    }))
   }
 
   render() {
-    const {count, isPlay, minutes, seconds} = this.state
+    const {count, isPlay} = this.state
 
     return (
       <div className="container">
         <h1 className="heading">Digital Timer</h1>
         <div className="sub-container">
           <div className="timer-container">
-            <h1 className="timer">
-              {minutes}:{seconds}
-            </h1>
+            <h1 className="timer">{this.getElapsedSecondsInTimeFormat()}</h1>
             {isPlay ? (
               <p className="details">running</p>
             ) : (
@@ -70,11 +81,11 @@ class DigitalTimer extends Component {
                 >
                   <img
                     src="https://assets.ccbp.in/frontend/react-js/pause-icon-img.png"
-                    alt="play icon"
+                    alt="pause icon"
                     className="play-icon"
                   />
+                  <p className="bold">Pause</p>
                 </button>
-                <p className="bold">Pause</p>
               </div>
             ) : (
               <div className="column-container">
@@ -88,8 +99,8 @@ class DigitalTimer extends Component {
                     alt="play icon"
                     className="play-icon"
                   />
+                  <p className="bold">Start</p>
                 </button>
-                <p className="bold">Start</p>
               </div>
             )}
             <div className="column-container">
@@ -100,8 +111,8 @@ class DigitalTimer extends Component {
                   className="reset-icon"
                   onClick={this.onReset}
                 />
+                <p className="bold">Reset</p>
               </button>
-              <p className="bold">Reset</p>
             </div>
           </div>
           <div className="time-setter-container">
@@ -111,11 +122,19 @@ class DigitalTimer extends Component {
                 type="button"
                 className="minus"
                 onClick={this.onDecrement}
+                disabled={isPlay}
               >
                 -
               </button>
-              <p className="number">{count}</p>
-              <button type="button" className="plus" onClick={this.onIncrement}>
+              <p className="number" disabled={isPlay}>
+                {count}
+              </p>
+              <button
+                type="button"
+                className="plus"
+                onClick={this.onIncrement}
+                disabled={isPlay}
+              >
                 +
               </button>
             </div>
